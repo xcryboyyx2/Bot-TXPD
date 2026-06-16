@@ -401,7 +401,8 @@ client.on('messageCreate', async message => {
         )
         .setTimestamp();
 
-      await message.channel.send({ embeds: [embed] });
+      const msg = await message.channel.send({ embeds: [embed] });
+      setTimeout(() => msg.delete().catch(() => {}), 6000);
       return;
     }
 
@@ -480,8 +481,10 @@ client.on('messageCreate', async message => {
           .setTimestamp();
 
         await response.update({ embeds: [resultEmbed], components: [] });
+        setTimeout(() => confirmMsg.delete().catch(() => {}), 6000);
       } catch {
         await confirmMsg.edit({ embeds: [EmbedBuilder.from(confirmEmbed).setDescription('⏰ Tiempo de espera agotado.').setFooter(null)], components: [] });
+        setTimeout(() => confirmMsg.delete().catch(() => {}), 6000);
       }
       return;
     }
@@ -504,7 +507,8 @@ client.on('messageCreate', async message => {
         )
         .setTimestamp();
 
-      await message.channel.send({ embeds: [embed] });
+      const msg = await message.channel.send({ embeds: [embed] });
+      setTimeout(() => msg.delete().catch(() => {}), 6000);
       return;
     }
 
@@ -571,8 +575,10 @@ client.on('messageCreate', async message => {
           .setTimestamp();
 
         await response.update({ embeds: [resultEmbed], components: [] });
+        setTimeout(() => confirmMsg.delete().catch(() => {}), 6000);
       } catch {
         await confirmMsg.edit({ embeds: [EmbedBuilder.from(confirmEmbed).setDescription('⏰ Tiempo de espera agotado.').setFooter(null)], components: [] });
+        setTimeout(() => confirmMsg.delete().catch(() => {}), 6000);
       }
       return;
     }
