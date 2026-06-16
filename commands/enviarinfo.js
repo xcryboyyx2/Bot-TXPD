@@ -29,7 +29,6 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor(0x1A5276)
       .setDescription(content)
-      .setAuthor({ name: interaction.member.displayName, iconURL: interaction.user.displayAvatarURL() })
       .setTimestamp();
 
     try {
