@@ -458,7 +458,7 @@ client.on('messageCreate', async message => {
             )
             .setTimestamp();
 
-          const logChannelId = process.env.LOG_CHANNEL_ID;
+          const logChannelId = process.env.MOD_LOG_CHANNEL_ID;
           if (logChannelId) {
             const logChannel = message.guild.channels.cache.get(logChannelId);
             if (logChannel) logChannel.send({ embeds: [logEmbed] }).catch(() => {});
@@ -550,7 +550,7 @@ client.on('messageCreate', async message => {
           )
           .setTimestamp();
 
-        const logChannelId = process.env.LOG_CHANNEL_ID;
+        const logChannelId = process.env.MOD_LOG_CHANNEL_ID;
         if (logChannelId) {
           const logChannel = message.guild.channels.cache.get(logChannelId);
           if (logChannel) logChannel.send({ embeds: [logEmbed] }).catch(() => {});
