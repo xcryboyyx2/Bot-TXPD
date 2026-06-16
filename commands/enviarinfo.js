@@ -3,8 +3,8 @@ const { hasInfoRole } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('turnosinfo')
-    .setDescription('Enviar mensaje personalizado al canal de conteo')
+    .setName('enviarinfo')
+    .setDescription('Enviar un mensaje personalizado al canal de conteo de horas')
     .addStringOption(option =>
       option.setName('mensaje')
         .setDescription('Contenido del mensaje a publicar')

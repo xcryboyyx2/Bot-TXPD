@@ -190,6 +190,12 @@ function hasCupulaRole(member) {
   return member.roles.cache.some(role => CUPULA_ROLES.includes(role.name));
 }
 
+const INFO_ROLES = ['AG', ...CUPULA_ROLES];
+
+function hasInfoRole(member) {
+  return member.roles.cache.some(role => INFO_ROLES.includes(role.name));
+}
+
 function isPatrolChannel(interaction) {
   const threadId = process.env.PATROL_THREAD_ID;
   if (!threadId) return true;
@@ -201,6 +207,6 @@ module.exports = {
   getActivePatrol, startPatrol, endPatrol, cancelPatrol,
   savePatrolHistory, getPatrolHistory, getRanking,
   getPendingPatrols, getPatrolById, updatePatrolStatus, revertPatrolStatus, getReviewedPatrols,
-  formatTime, formatTimeShort,   hasOfficerRole, hasReviewRole, hasModRole, hasSupervisorRole, hasCupulaRole,
+  formatTime, formatTimeShort,   hasOfficerRole, hasReviewRole, hasModRole, hasSupervisorRole, hasCupulaRole, hasInfoRole,
   isPatrolChannel,
 };
