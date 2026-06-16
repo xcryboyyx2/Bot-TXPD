@@ -1,13 +1,23 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChannelType } = require('discord.js');
 const { hasModRole } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('turnosinfo')
-    .setDescription('Enviar mensaje informativo sobre el sistema de turnos'),
+    .setDescription('Crear post informativo sobre el sistema de turnos en el foro'),
   async execute(interaction) {
     if (!hasModRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
+    }
+
+    const forumId = process.env.PATROL_FORUM_ID;
+    if (!forumId) {
+      return interaction.reply({ content: '❌ PATROL_FORUM_ID no está configurado.', flags: MessageFlags.Ephemeral });
+    }
+
+    const forum = interaction.guild.channels.cache.get(forumId);
+    if (!forum || forum.type !== ChannelType.GuildForum) {
+      return interaction.reply({ content: '❌ No se encontró el foro de patrullaje.', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
@@ -23,10 +33,17 @@ module.exports = {
       .setTimestamp();
 
     try {
-      await interaction.channel.send({ embeds: [embed] });
-      await interaction.reply({ content: '✅ Mensaje enviado.', flags: MessageFlags.Ephemeral });
-    } catch {
-      await interaction.reply({ content: '❌ No tengo permiso para enviar mensajes aquí. Asegúrate de que el bot tenga permiso de "Enviar Mensajes" en el foro.', flags: MessageFlags.Ephemeral });
+      await forum.threads.create({
+        name: 'duty',
+        message: { embeds: [embed] },
+        autoArchiveDuration: 1440,
+      });
+      await interaction.reply({ content: '✅ Post "duty" creado en el foro.', flags: MessageFlags.Ephemeral });
+    } catch (e) {
+      if (e.code === 160004) {
+        return interaction.reply({ content: '❌ Ya existe un post llamado "duty". Borra el existente primero.', flags: MessageFlags.Ephemeral });
+      }
+      await interaction.reply({ content: `❌ Error al crear el post: ${e.message}`, flags: MessageFlags.Ephemeral });
     }
   },
 };
