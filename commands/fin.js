@@ -23,16 +23,22 @@ module.exports = {
         .setRequired(false)),
   async execute(interaction) {
     if (!hasOfficerRole(interaction.member)) {
-      return interaction.reply({ content: '❌ Solo los oficiales con rol **Refuerzos** pueden usar este comando.', flags: MessageFlags.Ephemeral });
+      await interaction.reply({ content: '❌ Solo los oficiales con rol **Refuerzos** pueden usar este comando.', flags: MessageFlags.Ephemeral });
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      return;
     }
 
     if (!isPatrolChannel(interaction)) {
-      return interaction.reply({ content: '❌ Este comando solo puede usarse en el foro de patrullaje.', flags: MessageFlags.Ephemeral });
+      await interaction.reply({ content: '❌ Este comando solo puede usarse en el foro de patrullaje.', flags: MessageFlags.Ephemeral });
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      return;
     }
 
     const existing = getActivePatrol(interaction.user.id);
     if (!existing) {
-      return interaction.reply({ content: 'No tienes un turno activo. Usa /inicio para empezar uno.', flags: MessageFlags.Ephemeral });
+      await interaction.reply({ content: 'No tienes un turno activo. Usa /inicio para empezar uno.', flags: MessageFlags.Ephemeral });
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      return;
     }
 
     const result = endPatrol(interaction.user.id);
@@ -55,12 +61,15 @@ module.exports = {
       { inicio: imgInicio?.url || null, fin: imgFin?.url || null, dveh: imgDveh?.url || null, fuerza: imgFuerza?.url || null }
     );
 
+    const patrolDate = new Date().toLocaleDateString('es-ES', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
+
     const receiptEmbed = new EmbedBuilder()
       .setColor(0xFFA500)
       .setTitle('📄 Comprobante de Patrullaje')
       .setDescription(`**Oficial:** ${interaction.member.displayName}\n**Estado:** ⏳ Pendiente de revisión`)
       .addFields(
         { name: '🆔 ID Turno', value: `\`${patrol.id}\``, inline: true },
+        { name: '📅 Fecha', value: patrolDate, inline: true },
         { name: '⏱ Horas', value: formatTime(result.elapsed), inline: true },
         { name: '📸 Inicio', value: imgInicio ? `[Ver imagen](${imgInicio.url})` : 'No proporcionada', inline: true },
         { name: '📸 Fin', value: imgFin ? `[Ver imagen](${imgFin.url})` : 'No proporcionada', inline: true },
@@ -70,7 +79,7 @@ module.exports = {
       .setFooter({ text: 'Dudar es traición' })
       .setTimestamp();
 
-    if (imgInicio) receiptEmbed.setThumbnail(imgInicio.url);
+    receiptEmbed.setThumbnail(interaction.user.displayAvatarURL({ dynamic: true, size: 1024 }));
 
     try {
       await interaction.user.send({ embeds: [receiptEmbed] });
@@ -90,5 +99,6 @@ module.exports = {
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
   },
 };

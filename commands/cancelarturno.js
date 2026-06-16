@@ -7,16 +7,22 @@ module.exports = {
     .setDescription('Cancelar el turno de patrullaje actual'),
   async execute(interaction) {
     if (!hasOfficerRole(interaction.member)) {
-      return interaction.reply({ content: '❌ Solo los oficiales con rol **Refuerzos** pueden usar este comando.', flags: MessageFlags.Ephemeral });
+      await interaction.reply({ content: '❌ Solo los oficiales con rol **Refuerzos** pueden usar este comando.', flags: MessageFlags.Ephemeral });
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      return;
     }
 
     if (!isPatrolChannel(interaction)) {
-      return interaction.reply({ content: '❌ Este comando solo puede usarse en el foro de patrullaje.', flags: MessageFlags.Ephemeral });
+      await interaction.reply({ content: '❌ Este comando solo puede usarse en el foro de patrullaje.', flags: MessageFlags.Ephemeral });
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      return;
     }
 
     const existing = getActivePatrol(interaction.user.id);
     if (!existing) {
-      return interaction.reply({ content: 'No tienes un turno activo para cancelar.', flags: MessageFlags.Ephemeral });
+      await interaction.reply({ content: 'No tienes un turno activo para cancelar.', flags: MessageFlags.Ephemeral });
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      return;
     }
 
     const result = cancelPatrol(interaction.user.id);
@@ -36,5 +42,6 @@ module.exports = {
       .setTimestamp();
 
     await interaction.reply({ embeds: [cancelEmbed], flags: MessageFlags.Ephemeral });
+    setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
   },
 };

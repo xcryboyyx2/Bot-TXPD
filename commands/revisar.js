@@ -195,8 +195,14 @@ module.exports = {
         }
       }
 
-      const officerMember = interaction.guild.members.cache.get(patrol.userId);
+      let officerMember = interaction.guild.members.cache.get(patrol.userId);
+      if (!officerMember) {
+        try {
+          officerMember = await interaction.guild.members.fetch(patrol.userId);
+        } catch {}
+      }
       const reviewerStr = `${interaction.member.displayName} - ${interaction.user.tag}`;
+      const patrolDate = new Date(patrol.startTime).toLocaleDateString('es-ES', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
 
       if (newStatus === 'approved') {
         const receiptEmbed = new EmbedBuilder()
@@ -205,6 +211,7 @@ module.exports = {
           .setDescription(`**Oficial:** ${patrol.displayName}\n**Estado:** ✅ Aprobado`)
           .addFields(
             { name: '🆔 ID Turno', value: `\`${patrol.id}\``, inline: true },
+            { name: '📅 Fecha', value: patrolDate, inline: true },
             { name: '⏱ Horas', value: formatTime(patrol.elapsed), inline: true },
             { name: '📸 Inicio', value: patrol.images.inicio ? `[Ver imagen](${patrol.images.inicio})` : 'No proporcionada', inline: true },
             { name: '📸 Fin', value: patrol.images.fin ? `[Ver imagen](${patrol.images.fin})` : 'No proporcionada', inline: true },
@@ -215,7 +222,7 @@ module.exports = {
           .setFooter({ text: 'Dudar es traición' })
           .setTimestamp();
 
-        if (patrol.images.inicio) receiptEmbed.setThumbnail(patrol.images.inicio);
+        if (officerMember) receiptEmbed.setThumbnail(officerMember.displayAvatarURL({ dynamic: true, size: 1024 }));
 
         if (officerMember) {
           try {
@@ -228,6 +235,7 @@ module.exports = {
           .setTitle('❌ Patrullaje Rechazado')
           .setDescription(`**Oficial:** ${patrol.displayName}\n\nTu turno \`${patrol.id}\` ha sido **rechazado**.\n\nSi crees que esto fue un error, abre un ticket y contacta al personal encargado.`)
           .addFields(
+            { name: '📅 Fecha', value: patrolDate, inline: true },
             { name: '⏱ Horas', value: formatTime(patrol.elapsed), inline: true },
             { name: '👮 Revisado por', value: reviewerStr, inline: false },
           )
@@ -235,6 +243,7 @@ module.exports = {
           .setTimestamp();
 
         if (officerMember) {
+          rejectEmbed.setThumbnail(officerMember.displayAvatarURL({ dynamic: true, size: 1024 }));
           try {
             await officerMember.send({ embeds: [rejectEmbed] });
           } catch {}

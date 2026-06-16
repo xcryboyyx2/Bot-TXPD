@@ -352,6 +352,7 @@ client.on('messageCreate', async message => {
 
   // --- Informative commands (-prefix) ---
   if (prefix === '-') {
+    console.log(`Comando detectado: prefix=${prefix}, cmd=${cmd}, args=${args.slice(1).join('|')}`);
     if (cmd === 'reportar' || cmd === 'report' || cmd === 'reporte') {
       const embed = new EmbedBuilder()
         .setColor(0x3498DB)
@@ -383,11 +384,16 @@ client.on('messageCreate', async message => {
       if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!target.moderatable) return message.channel.send('❌ No puedo silenciar a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
-      const minutes = parseInt(args[1]);
-      if (isNaN(minutes) || minutes < 1) return message.channel.send('❌ Especifica una duración válida en minutos.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      let minutes = NaN;
+      let minutesIdx = -1;
+      for (let i = 1; i < args.length; i++) {
+        const n = parseInt(args[i]);
+        if (!isNaN(n) && n > 0) { minutes = n; minutesIdx = i; break; }
+      }
+      if (isNaN(minutes) || minutes < 1) return message.channel.send(`❌ Especifica una duración válida en minutos. Args: \`${args.slice(1).join(', ')}\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
       await message.delete().catch(() => {});
-      const reason = args.slice(2).join(' ') || 'No especificada';
+      const reason = args.slice(minutesIdx + 1).join(' ') || 'No especificada';
       await target.timeout(minutes * 60 * 1000, reason);
 
       const embed = new EmbedBuilder()
