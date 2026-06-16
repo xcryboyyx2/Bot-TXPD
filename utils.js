@@ -162,6 +162,7 @@ function formatTimeShort(ms) {
 const ROLE_NAME = 'Refuerzos';
 const ROLE_REVIEW = 'Control de Asistencias';
 const MOD_ROLES = [
+  'AG',
   'Special Investigation Section',
   'Police Sergeant I', 'Police Sergeant II', 'Police Lieutenant',
   'Police Captain', 'Police Commander',
