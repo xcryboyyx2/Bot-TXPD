@@ -368,6 +368,7 @@ client.on('messageCreate', async message => {
         .setColor(0x3498DB)
         .setTitle('📋 Postulaciones')
         .setDescription(`Puedes ver el estatus de las postulaciones en el canal de <#1103779684862410772>, ahí verás información valiosa e importante respecto al Texas Police Department, ¡espero sigas con el mismo interés al querer unirte a nuestras filas, te esperamos!`)
+        .setImage('https://i.imgur.com/I6KP3q7.jpeg')
         .setTimestamp();
 
       await message.channel.send({ embeds: [embed] });
