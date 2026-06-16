@@ -4,18 +4,24 @@ const { getPatrolHistory, formatTime, hasModRole } = require('../utils');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ultimosturnos')
-    .setDescription('Ver turnos realizados en las últimas 24 horas'),
+    .setDescription('Ver turnos registrados')
+    .addIntegerOption(option =>
+      option.setName('horas')
+        .setDescription('Horas hacia atrás (0 = todos, default 24)')
+        .setRequired(false)),
   async execute(interaction) {
     if (!hasModRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
+    const hours = interaction.options.getInteger('horas') ?? 24;
     const all = getPatrolHistory();
-    const cutoff = Date.now() - 86400000;
+    const cutoff = hours > 0 ? Date.now() - hours * 3600000 : 0;
     const recent = all.filter(p => p.startTime >= cutoff);
 
     if (recent.length === 0) {
-      return interaction.reply({ content: '✅ No hay turnos registrados en las últimas 24 horas.', flags: MessageFlags.Ephemeral });
+      const msg = hours > 0 ? `en las últimas ${hours}h` : 'registrados';
+      return interaction.reply({ content: `✅ No hay turnos ${msg}.`, flags: MessageFlags.Ephemeral });
     }
 
     const pending = recent.filter(p => p.status === 'pending');
@@ -29,10 +35,14 @@ module.exports = {
       lines.push(`${emoji} **${p.displayName}** — ${formatTime(p.elapsed)} — ${time} UTC \`${p.id}\``);
     }
 
+    const hoursLabel = hours > 0 ? `Últimas ${hours}h` : 'Todos los turnos';
+    let desc = lines.join('\n');
+    if (desc.length > 4000) desc = desc.slice(0, 3997) + '...';
+
     const embed = new EmbedBuilder()
       .setColor(0x3498DB)
-      .setTitle('📋 Turnos — Últimas 24h')
-      .setDescription(lines.join('\n'))
+      .setTitle(`📋 ${hoursLabel}`)
+      .setDescription(desc)
       .addFields(
         { name: '⏳ Pendientes', value: `${pending.length}`, inline: true },
         { name: '✅ Aprobados', value: `${approved.length}`, inline: true },
