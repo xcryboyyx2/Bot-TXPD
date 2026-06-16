@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const { getPatrolHistory, formatTime, hasModRole } = require('../utils');
+const { getPatrolHistory, formatTime, hasReviewRole } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,7 +10,7 @@ module.exports = {
         .setDescription('Nombre_Apellido del oficial')
         .setRequired(true)),
   async execute(interaction) {
-    if (!hasModRole(interaction.member)) {
+    if (!hasReviewRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
