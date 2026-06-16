@@ -10,9 +10,9 @@ module.exports = {
       return interaction.reply({ content: '❌ Solo la cúpula departamental puede usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
-    const threadId = process.env.PATROL_THREAD_ID;
+    const threadId = process.env.INFO_THREAD_ID;
     if (!threadId) {
-      return interaction.reply({ content: '❌ PATROL_THREAD_ID no está configurado.', flags: MessageFlags.Ephemeral });
+      return interaction.reply({ content: '❌ INFO_THREAD_ID no está configurado.', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
