@@ -14,4 +14,4 @@ jobs:
         with:
           token: ${{ secrets.DISCLOUD_TOKEN }}
           app_id: 1781574512472
-          env_file: .env
+          env: ${{ secrets.ENV }}
