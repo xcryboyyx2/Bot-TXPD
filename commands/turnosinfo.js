@@ -10,9 +10,7 @@ module.exports = {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
-    if (!interaction.channel || (interaction.channel.type === ChannelType.GuildForum)) {
-      return interaction.reply({ content: '❌ No puedo enviar mensajes aquí. Usa este comando en un hilo o canal de texto.', flags: MessageFlags.Ephemeral });
-    }
+    if (!interaction.channel || interaction.channel.type === ChannelType.GuildForum) {
       return interaction.reply({ content: '❌ No puedo enviar mensajes aquí. Usa este comando en un hilo o canal de texto.', flags: MessageFlags.Ephemeral });
     }
 
