@@ -196,6 +196,7 @@ module.exports = {
       }
 
       const officerMember = interaction.guild.members.cache.get(patrol.userId);
+      const reviewerStr = `${interaction.member.displayName} - ${interaction.user.tag}`;
 
       if (newStatus === 'approved') {
         const receiptEmbed = new EmbedBuilder()
@@ -209,6 +210,7 @@ module.exports = {
             { name: '📸 Fin', value: patrol.images.fin ? `[Ver imagen](${patrol.images.fin})` : 'No proporcionada', inline: true },
             { name: '📸 /dveh', value: patrol.images.dveh ? `[Ver imagen](${patrol.images.dveh})` : 'No proporcionada', inline: true },
             { name: '📸 /fuerza', value: patrol.images.fuerza ? `[Ver imagen](${patrol.images.fuerza})` : 'No proporcionada', inline: true },
+            { name: '👮 Revisado por', value: reviewerStr, inline: false },
           )
           .setFooter({ text: 'Dudar es traición' })
           .setTimestamp();
@@ -227,6 +229,7 @@ module.exports = {
           .setDescription(`**Oficial:** ${patrol.displayName}\n\nTu turno \`${patrol.id}\` ha sido **rechazado**.\n\nSi crees que esto fue un error, abre un ticket y contacta al personal encargado.`)
           .addFields(
             { name: '⏱ Horas', value: formatTime(patrol.elapsed), inline: true },
+            { name: '👮 Revisado por', value: reviewerStr, inline: false },
           )
           .setFooter({ text: 'Dudar es traición' })
           .setTimestamp();
