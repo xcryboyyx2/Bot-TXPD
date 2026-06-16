@@ -468,6 +468,79 @@ client.on('messageCreate', async message => {
       return;
     }
 
+    if (cmd === 'unmute') {
+      const target = message.mentions.members.first();
+      if (!target) return message.channel.send('❌ Debes mencionar a un usuario. Uso: `-unmute @usuario`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      if (!target.moderatable) return message.channel.send('❌ No puedo quitar el silencio a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      await target.timeout(null);
+
+      const embed = new EmbedBuilder()
+        .setColor(0x00FF00)
+        .setTitle('🔊 Silencio Removido')
+        .addFields(
+          { name: 'Usuario', value: `${target.displayName} (${target.id})`, inline: true },
+          { name: 'Moderador', value: message.member.displayName, inline: true },
+        )
+        .setTimestamp();
+
+      await message.channel.send({ embeds: [embed] });
+      return;
+    }
+
+    if (cmd === 'unban') {
+      if (!hasModRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      const userId = args[1]?.replace(/\D/g, '');
+      if (!userId || userId.length < 10) return message.channel.send('❌ Debes proporcionar el ID del usuario. Uso: `-unban ID_usuario [razón]`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      const reason = args.slice(2).join(' ') || 'No especificada';
+
+      const confirmEmbed = new EmbedBuilder()
+        .setColor(0x00FF00)
+        .setTitle('⛔ Confirmar Desbaneo')
+        .setDescription(`**ID:** ${userId}\n**Moderador:** ${message.member.displayName}\n**Razón:** ${reason}`)
+        .setFooter({ text: '¿Estás seguro?' })
+        .setTimestamp();
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('unban_yes').setLabel('✅ Confirmar').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('unban_no').setLabel('❌ Cancelar').setStyle(ButtonStyle.Secondary),
+      );
+
+      const confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
+
+      try {
+        const response = await confirmMsg.awaitMessageComponent({
+          filter: i => i.user.id === message.author.id,
+          time: 30000,
+        });
+
+        if (response.customId === 'unban_no') {
+          await response.update({ embeds: [EmbedBuilder.from(confirmEmbed).setDescription('❌ Acción cancelada.').setFooter(null)], components: [] });
+          return;
+        }
+
+        await message.guild.members.unban(userId, reason);
+
+        const resultEmbed = new EmbedBuilder()
+          .setColor(0x00FF00)
+          .setTitle('⛔ Usuario Desbaneado')
+          .addFields(
+            { name: 'ID', value: userId, inline: true },
+            { name: 'Moderador', value: message.member.displayName, inline: true },
+            { name: 'Razón', value: reason, inline: false },
+          )
+          .setTimestamp();
+
+        await response.update({ embeds: [resultEmbed], components: [] });
+      } catch {
+        await confirmMsg.edit({ embeds: [EmbedBuilder.from(confirmEmbed).setDescription('⏰ Tiempo de espera agotado.').setFooter(null)], components: [] });
+      }
+      return;
+    }
+
     return;
   }
 
