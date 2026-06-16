@@ -3,3 +3,7 @@ node_modules/
 data/
 Bot-TXPD.zip
 makezip.mjs
+*.jpg
+*.jpeg
+*.png
+*.gif
