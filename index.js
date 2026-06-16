@@ -351,7 +351,7 @@ client.on('messageCreate', async message => {
 
   // --- Informative commands (-prefix) ---
   if (prefix === '-') {
-    if (cmd === 'reportar' || cmd === 'report') {
+    if (cmd === 'reportar' || cmd === 'report' || cmd === 'reporte') {
       const embed = new EmbedBuilder()
         .setColor(0x3498DB)
         .setTitle('📋 Reportar un Oficial')
