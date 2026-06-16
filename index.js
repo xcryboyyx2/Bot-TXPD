@@ -352,7 +352,6 @@ client.on('messageCreate', async message => {
 
   // --- Informative commands (-prefix) ---
   if (prefix === '-') {
-    console.log(`Comando detectado: prefix=${prefix}, cmd=${cmd}, args=${args.slice(1).join('|')}`);
     if (cmd === 'reportar' || cmd === 'report' || cmd === 'reporte') {
       const embed = new EmbedBuilder()
         .setColor(0x3498DB)
@@ -379,6 +378,7 @@ client.on('messageCreate', async message => {
 
     // --- Mod commands (-prefix) ---
     if (cmd === 'mute') {
+      await message.delete().catch(() => {});
       const target = message.mentions.members.first();
       if (!target) return message.channel.send('❌ Debes mencionar a un usuario. Uso: `-mute @usuario minutos [razón]`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
@@ -390,9 +390,8 @@ client.on('messageCreate', async message => {
         const n = parseInt(args[i]);
         if (!isNaN(n) && n > 0) { minutes = n; minutesIdx = i; break; }
       }
-      if (isNaN(minutes) || minutes < 1) return message.channel.send(`❌ Especifica una duración válida en minutos. Args: \`${args.slice(1).join(', ')}\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      if (isNaN(minutes) || minutes < 1) return message.channel.send('❌ Especifica una duración válida en minutos.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
-      await message.delete().catch(() => {});
       const reason = args.slice(minutesIdx + 1).join(' ') || 'No especificada';
       await target.timeout(minutes * 60 * 1000, reason);
 
@@ -413,6 +412,7 @@ client.on('messageCreate', async message => {
     }
 
     if (cmd === 'kick' || cmd === 'ban') {
+      await message.delete().catch(() => {});
       const isBan = cmd === 'ban';
       const target = message.mentions.members.first();
       if (!target) return message.channel.send(`❌ Debes mencionar a un usuario. Uso: \`-${cmd} @usuario [razón]\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
@@ -426,7 +426,6 @@ client.on('messageCreate', async message => {
       if (isBan && !target.bannable) return message.channel.send('❌ No puedo banear a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!isBan && !target.kickable) return message.channel.send('❌ No puedo expulsar a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
-      await message.delete().catch(() => {});
       const reason = args.slice(2).join(' ') || 'No especificada';
 
       const confirmEmbed = new EmbedBuilder()
@@ -496,12 +495,12 @@ client.on('messageCreate', async message => {
     }
 
     if (cmd === 'unmute') {
+      await message.delete().catch(() => {});
       const target = message.mentions.members.first();
       if (!target) return message.channel.send('❌ Debes mencionar a un usuario. Uso: `-unmute @usuario`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!target.moderatable) return message.channel.send('❌ No puedo quitar el silencio a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
-      await message.delete().catch(() => {});
       await target.timeout(null);
 
       const embed = new EmbedBuilder()
@@ -519,12 +518,12 @@ client.on('messageCreate', async message => {
     }
 
     if (cmd === 'unban') {
+      await message.delete().catch(() => {});
       if (!hasModRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
       const userId = args[1]?.replace(/\D/g, '');
       if (!userId || userId.length < 10) return message.channel.send('❌ Debes proporcionar el ID del usuario. Uso: `-unban ID_usuario [razón]`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
-      await message.delete().catch(() => {});
       const reason = args.slice(2).join(' ') || 'No especificada';
 
       const confirmEmbed = new EmbedBuilder()
