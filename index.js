@@ -363,6 +363,17 @@ client.on('messageCreate', async message => {
       return;
     }
 
+    if (cmd === 'postulaciones' || cmd === 'postular' || cmd === 'aplicar') {
+      const embed = new EmbedBuilder()
+        .setColor(0x3498DB)
+        .setTitle('📋 Postulaciones')
+        .setDescription(`Puedes ver el estatus de las postulaciones en el canal de <#1103779684862410772>, ahí verás información valiosa e importante respecto al Texas Police Department, ¡espero sigas con el mismo interés al querer unirte a nuestras filas, te esperamos!`)
+        .setTimestamp();
+
+      await message.channel.send({ embeds: [embed] });
+      return;
+    }
+
     return;
   }
 
