@@ -386,6 +386,7 @@ client.on('messageCreate', async message => {
       const minutes = parseInt(args[1]);
       if (isNaN(minutes) || minutes < 1) return message.channel.send('❌ Especifica una duración válida en minutos.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
+      await message.delete().catch(() => {});
       const reason = args.slice(2).join(' ') || 'No especificada';
       await target.timeout(minutes * 60 * 1000, reason);
 
@@ -418,6 +419,7 @@ client.on('messageCreate', async message => {
       if (isBan && !target.bannable) return message.channel.send('❌ No puedo banear a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!isBan && !target.kickable) return message.channel.send('❌ No puedo expulsar a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
+      await message.delete().catch(() => {});
       const reason = args.slice(2).join(' ') || 'No especificada';
 
       const confirmEmbed = new EmbedBuilder()
@@ -432,7 +434,12 @@ client.on('messageCreate', async message => {
         new ButtonBuilder().setCustomId('confirm_no').setLabel('❌ Cancelar').setStyle(ButtonStyle.Secondary),
       );
 
-      const confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
+      let confirmMsg;
+      try {
+        confirmMsg = await message.author.send({ embeds: [confirmEmbed], components: [row] });
+      } catch {
+        confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
+      }
 
       try {
         const response = await confirmMsg.awaitMessageComponent({
@@ -490,6 +497,7 @@ client.on('messageCreate', async message => {
       if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       if (!target.moderatable) return message.channel.send('❌ No puedo quitar el silencio a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
+      await message.delete().catch(() => {});
       await target.timeout(null);
 
       const embed = new EmbedBuilder()
@@ -511,6 +519,7 @@ client.on('messageCreate', async message => {
       const userId = args[1]?.replace(/\D/g, '');
       if (!userId || userId.length < 10) return message.channel.send('❌ Debes proporcionar el ID del usuario. Uso: `-unban ID_usuario [razón]`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
 
+      await message.delete().catch(() => {});
       const reason = args.slice(2).join(' ') || 'No especificada';
 
       const confirmEmbed = new EmbedBuilder()
@@ -525,7 +534,12 @@ client.on('messageCreate', async message => {
         new ButtonBuilder().setCustomId('unban_no').setLabel('❌ Cancelar').setStyle(ButtonStyle.Secondary),
       );
 
-      const confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
+      let confirmMsg;
+      try {
+        confirmMsg = await message.author.send({ embeds: [confirmEmbed], components: [row] });
+      } catch {
+        confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
+      }
 
       try {
         const response = await confirmMsg.awaitMessageComponent({
