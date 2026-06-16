@@ -2,6 +2,7 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, REST, Routes, Collection, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { hasModRole, hasSupervisorRole } = require('./utils');
 
 const client = new Client({
   intents: [
@@ -372,6 +373,98 @@ client.on('messageCreate', async message => {
         .setTimestamp();
 
       await message.channel.send({ embeds: [embed] });
+      return;
+    }
+
+    // --- Mod commands (-prefix) ---
+    if (cmd === 'mute') {
+      const target = message.mentions.members.first();
+      if (!target) return message.channel.send('❌ Debes mencionar a un usuario. Uso: `-mute @usuario minutos [razón]`').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      if (!target.moderatable) return message.channel.send('❌ No puedo silenciar a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      const minutes = parseInt(args[1]);
+      if (isNaN(minutes) || minutes < 1) return message.channel.send('❌ Especifica una duración válida en minutos.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      const reason = args.slice(2).join(' ') || 'No especificada';
+      await target.timeout(minutes * 60 * 1000, reason);
+
+      const embed = new EmbedBuilder()
+        .setColor(0xFFFF00)
+        .setTitle('🔇 Usuario Silenciado')
+        .addFields(
+          { name: 'Usuario', value: `${target.displayName} (${target.id})`, inline: true },
+          { name: 'Duración', value: `${minutes} minuto(s)`, inline: true },
+          { name: 'Moderador', value: message.member.displayName, inline: true },
+          { name: 'Razón', value: reason, inline: false },
+        )
+        .setTimestamp();
+
+      await message.channel.send({ embeds: [embed] });
+      return;
+    }
+
+    if (cmd === 'kick' || cmd === 'ban') {
+      const isBan = cmd === 'ban';
+      const target = message.mentions.members.first();
+      if (!target) return message.channel.send(`❌ Debes mencionar a un usuario. Uso: \`-${cmd} @usuario [razón]\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      if (isBan) {
+        if (!hasModRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      } else {
+        if (!hasModRole(message.member) && !hasSupervisorRole(message.member)) return message.channel.send('❌ No tienes permiso para usar este comando.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      }
+
+      if (isBan && !target.bannable) return message.channel.send('❌ No puedo banear a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      if (!isBan && !target.kickable) return message.channel.send('❌ No puedo expulsar a ese usuario.').then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+
+      const reason = args.slice(2).join(' ') || 'No especificada';
+
+      const confirmEmbed = new EmbedBuilder()
+        .setColor(isBan ? 0xFF0000 : 0xFFA500)
+        .setTitle(isBan ? '🔨 Confirmar Baneo' : '👢 Confirmar Expulsión')
+        .setDescription(`**Usuario:** ${target.displayName} (${target.id})\n**Moderador:** ${message.member.displayName}\n**Razón:** ${reason}`)
+        .setFooter({ text: '¿Estás seguro?' })
+        .setTimestamp();
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('confirm_yes').setLabel('✅ Confirmar').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('confirm_no').setLabel('❌ Cancelar').setStyle(ButtonStyle.Secondary),
+      );
+
+      const confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
+
+      try {
+        const response = await confirmMsg.awaitMessageComponent({
+          filter: i => i.user.id === message.author.id,
+          time: 30000,
+        });
+
+        if (response.customId === 'confirm_no') {
+          await response.update({ embeds: [EmbedBuilder.from(confirmEmbed).setDescription('❌ Acción cancelada.').setFooter(null)], components: [] });
+          return;
+        }
+
+        if (isBan) {
+          await target.ban({ reason });
+        } else {
+          await target.kick(reason);
+        }
+
+        const resultEmbed = new EmbedBuilder()
+          .setColor(isBan ? 0xFF0000 : 0xFFA500)
+          .setTitle(isBan ? '🔨 Usuario Baneado' : '👢 Usuario Expulsado')
+          .addFields(
+            { name: 'Usuario', value: `${target.displayName} (${target.id})`, inline: true },
+            { name: 'Moderador', value: message.member.displayName, inline: true },
+            { name: 'Razón', value: reason, inline: false },
+          )
+          .setTimestamp();
+
+        await response.update({ embeds: [resultEmbed], components: [] });
+      } catch {
+        await confirmMsg.edit({ embeds: [EmbedBuilder.from(confirmEmbed).setDescription('⏰ Tiempo de espera agotado.').setFooter(null)], components: [] });
+      }
       return;
     }
 
