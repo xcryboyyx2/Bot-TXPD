@@ -4,14 +4,10 @@ const { hasInfoRole } = require('../utils');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('turnosinfo')
-    .setDescription('Enviar mensaje personalizado al canal de conteo')
-    .addStringOption(option =>
-      option.setName('mensaje')
-        .setDescription('Contenido del mensaje a publicar')
-        .setRequired(true))
+    .setDescription('Enviar mensaje informativo al canal de conteo')
     .addAttachmentOption(option =>
       option.setName('imagen')
-        .setDescription('Imagen para el embed')
+        .setDescription('Imagen opcional para el embed')
         .setRequired(false)),
   async execute(interaction) {
     if (!hasInfoRole(interaction.member)) {
@@ -23,7 +19,6 @@ module.exports = {
       return interaction.reply({ content: '❌ INFO_THREAD_ID no está configurado.', flags: MessageFlags.Ephemeral });
     }
 
-    const content = interaction.options.getString('mensaje');
     const img = interaction.options.getAttachment('imagen');
 
     const thread = interaction.guild.channels.cache.get(threadId);
@@ -33,8 +28,14 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setColor(0x1A5276)
-      .setDescription(content)
-      .setAuthor({ name: interaction.member.displayName, iconURL: interaction.user.displayAvatarURL() })
+      .setTitle('🚔 Función de los turnos')
+      .setDescription('Se implementa un nuevo formato para automatizar los turnos hechos por el personal operativo, se va a utilizar esto para llevar un mejor control y comodidad del personal operativo.\n\nSu uso consta de 3 comandos para iniciar, finalizar y terminar un turno por si no puedes completarlo.')
+      .addFields(
+        { name: '`/inicio`', value: 'Iniciar tu turno de patrullaje.', inline: false },
+        { name: '`/fin`', value: 'Finalizar tu turno de patrullaje. (Fotos obligatorias requeridas)', inline: false },
+        { name: '`/cancelarturno`', value: 'Cancelar tu turno por si tienes inconvenientes.', inline: false },
+      )
+      .setFooter({ text: 'Eviten mal usar este hilo, únicamente se usará para los tres comandos antes mencionados.' })
       .setTimestamp();
 
     if (img) embed.setImage(img.url);
