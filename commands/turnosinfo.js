@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { hasModRole } = require('../utils');
 
 module.exports = {
@@ -8,10 +8,6 @@ module.exports = {
   async execute(interaction) {
     if (!hasModRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
-    }
-
-    if (!interaction.channel || interaction.channel.type === ChannelType.GuildForum) {
-      return interaction.reply({ content: '❌ No puedo enviar mensajes aquí. Usa este comando en un hilo o canal de texto.', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
@@ -26,7 +22,11 @@ module.exports = {
       .setFooter({ text: 'Eviten mal usar este hilo, únicamente se usará para los tres comandos antes mencionados.' })
       .setTimestamp();
 
-    await interaction.channel.send({ embeds: [embed] });
-    await interaction.reply({ content: '✅ Mensaje enviado.', flags: MessageFlags.Ephemeral });
+    try {
+      await interaction.channel.send({ embeds: [embed] });
+      await interaction.reply({ content: '✅ Mensaje enviado.', flags: MessageFlags.Ephemeral });
+    } catch {
+      await interaction.reply({ content: '❌ No tengo permiso para enviar mensajes aquí. Asegúrate de que el bot tenga permiso de "Enviar Mensajes" en el foro.', flags: MessageFlags.Ephemeral });
+    }
   },
 };
