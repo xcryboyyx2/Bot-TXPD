@@ -447,6 +447,22 @@ client.on('messageCreate', async message => {
 
         if (isBan) {
           await target.ban({ reason });
+
+          const logEmbed = new EmbedBuilder()
+            .setColor(0xFF0000)
+            .setTitle('🔨 Usuario Baneado')
+            .addFields(
+              { name: 'Usuario', value: `${target.displayName} (${target.id})`, inline: true },
+              { name: 'Moderador', value: message.member.displayName, inline: true },
+              { name: 'Razón', value: reason, inline: false },
+            )
+            .setTimestamp();
+
+          const logChannelId = process.env.LOG_CHANNEL_ID;
+          if (logChannelId) {
+            const logChannel = message.guild.channels.cache.get(logChannelId);
+            if (logChannel) logChannel.send({ embeds: [logEmbed] }).catch(() => {});
+          }
         } else {
           await target.kick(reason);
         }
@@ -522,7 +538,23 @@ client.on('messageCreate', async message => {
           return;
         }
 
-        await message.guild.members.unban(userId, reason);
+        const unbanned = await message.guild.members.unban(userId, reason);
+
+        const logEmbed = new EmbedBuilder()
+          .setColor(0x00FF00)
+          .setTitle('⛔ Usuario Desbaneado')
+          .addFields(
+            { name: 'Usuario', value: unbanned ? `${unbanned.tag} (${userId})` : userId, inline: true },
+            { name: 'Moderador', value: message.member.displayName, inline: true },
+            { name: 'Razón', value: reason, inline: false },
+          )
+          .setTimestamp();
+
+        const logChannelId = process.env.LOG_CHANNEL_ID;
+        if (logChannelId) {
+          const logChannel = message.guild.channels.cache.get(logChannelId);
+          if (logChannel) logChannel.send({ embeds: [logEmbed] }).catch(() => {});
+        }
 
         const resultEmbed = new EmbedBuilder()
           .setColor(0x00FF00)
