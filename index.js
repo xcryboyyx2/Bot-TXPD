@@ -434,12 +434,7 @@ client.on('messageCreate', async message => {
         new ButtonBuilder().setCustomId('confirm_no').setLabel('❌ Cancelar').setStyle(ButtonStyle.Secondary),
       );
 
-      let confirmMsg;
-      try {
-        confirmMsg = await message.author.send({ embeds: [confirmEmbed], components: [row] });
-      } catch {
-        confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
-      }
+      const confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
 
       try {
         const response = await confirmMsg.awaitMessageComponent({
@@ -534,12 +529,7 @@ client.on('messageCreate', async message => {
         new ButtonBuilder().setCustomId('unban_no').setLabel('❌ Cancelar').setStyle(ButtonStyle.Secondary),
       );
 
-      let confirmMsg;
-      try {
-        confirmMsg = await message.author.send({ embeds: [confirmEmbed], components: [row] });
-      } catch {
-        confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
-      }
+      const confirmMsg = await message.channel.send({ embeds: [confirmEmbed], components: [row] });
 
       try {
         const response = await confirmMsg.awaitMessageComponent({
