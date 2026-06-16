@@ -22,7 +22,7 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-client.once('ready', async () => {
+client.once('clientReady', async () => {
   setInterval(() => {
     try {
       client.user?.setPresence({
