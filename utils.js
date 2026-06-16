@@ -3,15 +3,6 @@ const path = require('path');
 
 const DATA_FILE = path.join(__dirname, 'data', 'patrols.json');
 const HISTORY_FILE = path.join(__dirname, 'data', 'history.json');
-const HISTORY_TTL = 48 * 60 * 60 * 1000; // 48 horas
-
-function cleanupHistory() {
-  const history = readJSON(HISTORY_FILE);
-  if (!history) return;
-  const cutoff = Date.now() - HISTORY_TTL;
-  const filtered = history.filter(h => h.startTime >= cutoff);
-  if (filtered.length !== history.length) writeJSON(HISTORY_FILE, filtered);
-}
 
 function readJSON(file) {
   try {
@@ -63,7 +54,6 @@ function cancelPatrol(userId) {
 // --- History ---
 
 function savePatrolHistory(userId, userName, displayName, startTime, elapsed, images) {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   history.push({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -83,26 +73,22 @@ function savePatrolHistory(userId, userName, displayName, startTime, elapsed, im
 }
 
 function getPatrolHistory(userId) {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   if (userId) return history.filter(h => h.userId === userId);
   return history;
 }
 
 function getPendingPatrols() {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   return history.filter(h => h.status === 'pending').reverse();
 }
 
 function getPatrolById(id) {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   return history.find(h => h.id === id) || null;
 }
 
 function updatePatrolStatus(id, status, reviewerId, reviewerName, logMessageId) {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   const index = history.findIndex(h => h.id === id);
   if (index === -1) return null;
@@ -116,7 +102,6 @@ function updatePatrolStatus(id, status, reviewerId, reviewerName, logMessageId) 
 }
 
 function revertPatrolStatus(id) {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   const index = history.findIndex(h => h.id === id);
   if (index === -1) return null;
@@ -133,13 +118,11 @@ function revertPatrolStatus(id) {
 }
 
 function getReviewedPatrols() {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   return history.filter(h => h.status === 'approved' || h.status === 'rejected').reverse().slice(0, 20);
 }
 
 function getRanking() {
-  cleanupHistory();
   const history = readJSON(HISTORY_FILE) || [];
   const totals = {};
   for (const h of history) {
@@ -207,5 +190,4 @@ module.exports = {
   getPendingPatrols, getPatrolById, updatePatrolStatus, revertPatrolStatus, getReviewedPatrols,
   formatTime, formatTimeShort, hasOfficerRole, hasReviewRole, hasModRole,
   isPatrolChannel,
-  cleanupHistory,
 };

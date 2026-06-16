@@ -23,9 +23,6 @@ for (const file of commandFiles) {
 }
 
 client.once('ready', async () => {
-  const { cleanupHistory } = require('./utils');
-  cleanupHistory();
-
   setInterval(() => {
     try {
       client.user?.setPresence({

@@ -7,14 +7,14 @@ module.exports = {
     .setDescription('Ver turnos registrados')
     .addIntegerOption(option =>
       option.setName('horas')
-        .setDescription('Horas hacia atrás (0 = todos, default 24)')
+        .setDescription('Horas hacia atrás (0 = todos, default 48)')
         .setRequired(false)),
   async execute(interaction) {
     if (!hasModRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
-    const hours = interaction.options.getInteger('horas') ?? 24;
+    const hours = interaction.options.getInteger('horas') ?? 48;
     const all = getPatrolHistory();
     const cutoff = hours > 0 ? Date.now() - hours * 3600000 : 0;
     const recent = all.filter(p => p.startTime >= cutoff);
