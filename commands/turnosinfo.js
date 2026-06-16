@@ -1,14 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { hasInfoRole } = require('../utils');
 
+const IMAGE_URL = 'https://i.imgur.com/iMqb6hv.jpeg';
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('turnosinfo')
-    .setDescription('Enviar mensaje informativo al canal de conteo')
-    .addAttachmentOption(option =>
-      option.setName('imagen')
-        .setDescription('Imagen opcional para el embed')
-        .setRequired(false)),
+    .setDescription('Enviar mensaje informativo al canal de conteo'),
   async execute(interaction) {
     if (!hasInfoRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
@@ -18,8 +16,6 @@ module.exports = {
     if (!threadId) {
       return interaction.reply({ content: '❌ INFO_THREAD_ID no está configurado.', flags: MessageFlags.Ephemeral });
     }
-
-    const img = interaction.options.getAttachment('imagen');
 
     const thread = interaction.guild.channels.cache.get(threadId);
     if (!thread) {
@@ -35,10 +31,9 @@ module.exports = {
         { name: '`/fin`', value: 'Finalizar tu turno de patrullaje. (Fotos obligatorias requeridas)', inline: false },
         { name: '`/cancelarturno`', value: 'Cancelar tu turno por si tienes inconvenientes.', inline: false },
       )
+      .setImage(IMAGE_URL)
       .setFooter({ text: 'Eviten mal usar este hilo, únicamente se usará para los tres comandos antes mencionados.' })
       .setTimestamp();
-
-    if (img) embed.setImage(img.url);
 
     try {
       await thread.send({ embeds: [embed] });
