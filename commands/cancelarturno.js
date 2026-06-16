@@ -35,6 +35,6 @@ module.exports = {
       .setFooter({ text: 'No registrado' })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [cancelEmbed] });
+    await interaction.reply({ embeds: [cancelEmbed], flags: MessageFlags.Ephemeral });
   },
 };
