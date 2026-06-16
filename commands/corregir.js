@@ -4,7 +4,7 @@ const {
   ComponentType, MessageFlags,
 } = require('discord.js');
 const {
-  getReviewedPatrols, revertPatrolStatus, formatTime, hasModRole,
+  getReviewedPatrols, revertPatrolStatus, formatTime, hasModRole, hasReviewRole,
 } = require('../utils');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
     .setName('corregir')
     .setDescription('Revertir un turno aprobado/rechazado a revisión'),
   async execute(interaction) {
-    if (!hasModRole(interaction.member)) {
+    if (!hasModRole(interaction.member) && !hasReviewRole(interaction.member)) {
       return interaction.reply({
         content: '❌ No tienes permiso para usar este comando.',
         flags: MessageFlags.Ephemeral,
