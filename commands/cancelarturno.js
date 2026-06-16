@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getActivePatrol, cancelPatrol, formatTime, hasOfficerRole } = require('../utils');
+const { getActivePatrol, cancelPatrol, formatTime, hasOfficerRole, isPatrolChannel } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,6 +8,10 @@ module.exports = {
   async execute(interaction) {
     if (!hasOfficerRole(interaction.member)) {
       return interaction.reply({ content: '❌ Solo los oficiales con rol **Refuerzos** pueden usar este comando.', flags: MessageFlags.Ephemeral });
+    }
+
+    if (!isPatrolChannel(interaction)) {
+      return interaction.reply({ content: '❌ Este comando solo puede usarse en el foro de patrullaje.', flags: MessageFlags.Ephemeral });
     }
 
     const existing = getActivePatrol(interaction.user.id);

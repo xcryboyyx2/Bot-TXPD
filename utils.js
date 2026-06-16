@@ -177,10 +177,17 @@ function hasModRole(member) {
   return member.roles.cache.some(role => MOD_ROLES.includes(role.name));
 }
 
+function isPatrolChannel(interaction) {
+  const forumId = process.env.PATROL_FORUM_ID;
+  if (!forumId) return true;
+  return interaction.channel.parentId === forumId && interaction.channel.isThread();
+}
+
 module.exports = {
   readJSON,
   getActivePatrol, startPatrol, endPatrol, cancelPatrol,
   savePatrolHistory, getPatrolHistory, getRanking,
   getPendingPatrols, getPatrolById, updatePatrolStatus, revertPatrolStatus, getReviewedPatrols,
   formatTime, formatTimeShort, hasOfficerRole, hasReviewRole, hasModRole,
+  isPatrolChannel,
 };
