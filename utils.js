@@ -178,9 +178,9 @@ function hasModRole(member) {
 }
 
 function isPatrolChannel(interaction) {
-  const forumId = process.env.PATROL_FORUM_ID;
-  if (!forumId) return true;
-  return interaction.channel.parentId === forumId && interaction.channel.isThread();
+  const threadId = process.env.PATROL_THREAD_ID;
+  if (!threadId) return true;
+  return interaction.channelId === threadId;
 }
 
 module.exports = {

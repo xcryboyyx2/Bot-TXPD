@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { hasModRole, hasReviewRole } = require('../utils');
 
 module.exports = {
@@ -10,14 +10,9 @@ module.exports = {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
-    const forumId = process.env.PATROL_FORUM_ID;
-    if (!forumId) {
-      return interaction.reply({ content: '❌ PATROL_FORUM_ID no está configurado.', flags: MessageFlags.Ephemeral });
-    }
-
-    const forum = interaction.guild.channels.cache.get(forumId);
-    if (!forum || forum.type !== ChannelType.GuildForum) {
-      return interaction.reply({ content: '❌ No se encontró el foro de patrullaje.', flags: MessageFlags.Ephemeral });
+    const threadId = process.env.PATROL_THREAD_ID;
+    if (!threadId) {
+      return interaction.reply({ content: '❌ PATROL_THREAD_ID no está configurado.', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
@@ -32,18 +27,16 @@ module.exports = {
       .setFooter({ text: 'Eviten mal usar este hilo, únicamente se usará para los tres comandos antes mencionados.' })
       .setTimestamp();
 
+    const thread = interaction.guild.channels.cache.get(threadId);
+    if (!thread) {
+      return interaction.reply({ content: '❌ No se encontró el hilo configurado.', flags: MessageFlags.Ephemeral });
+    }
+
     try {
-      await forum.threads.create({
-        name: 'duty',
-        message: { embeds: [embed] },
-        autoArchiveDuration: 1440,
-      });
-      await interaction.reply({ content: '✅ Post "duty" creado en el foro.', flags: MessageFlags.Ephemeral });
-    } catch (e) {
-      if (e.code === 160004) {
-        return interaction.reply({ content: '❌ Ya existe un post llamado "duty". Borra el existente primero.', flags: MessageFlags.Ephemeral });
-      }
-      await interaction.reply({ content: `❌ Error al crear el post: ${e.message}`, flags: MessageFlags.Ephemeral });
+      await thread.send({ embeds: [embed] });
+      await interaction.reply({ content: '✅ Mensaje informativo enviado al hilo.', flags: MessageFlags.Ephemeral });
+    } catch {
+      await interaction.reply({ content: '❌ Error al enviar el mensaje. Verifica que el bot tenga permisos en ese hilo.', flags: MessageFlags.Ephemeral });
     }
   },
 };
