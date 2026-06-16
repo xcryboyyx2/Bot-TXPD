@@ -39,6 +39,8 @@ client.once('clientReady', async () => {
 
   try {
     if (guildId) {
+      // Delete global commands to avoid duplicates
+      await rest.put(Routes.applicationCommands(client.user.id), { body: [] });
       await rest.put(Routes.applicationGuildCommands(client.user.id, guildId), { body: commands });
       console.log(`Comandos registrados en el guild ${guildId}`);
     } else {
