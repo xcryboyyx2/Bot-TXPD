@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { getActivePatrol, cancelPatrol, formatTime, hasOfficerRole, isPatrolChannel } = require('../utils');
 
 module.exports = {
@@ -26,6 +26,15 @@ module.exports = {
     if (role) await interaction.member.roles.remove(role);
     const timeStr = formatTime(elapsed);
 
-    await interaction.reply({ content: `❌ Turno cancelado. Tiempo transcurrido: **${timeStr}** (no registrado).`, flags: MessageFlags.Ephemeral });
+    const cancelEmbed = new EmbedBuilder()
+      .setColor(0xFF0000)
+      .setAuthor({ name: interaction.member.displayName, iconURL: interaction.user.displayAvatarURL() })
+      .setTitle('❌ TURNO CANCELADO')
+      .setDescription(`${interaction.user}`)
+      .addFields({ name: '⏱ Tiempo transcurrido', value: timeStr, inline: true })
+      .setFooter({ text: 'No registrado' })
+      .setTimestamp();
+
+    await interaction.reply({ embeds: [cancelEmbed] });
   },
 };

@@ -33,6 +33,6 @@ module.exports = {
       .setFooter({ text: 'Dudar es traición' })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds: [embed] });
   },
 };
