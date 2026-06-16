@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const { getPatrolHistory, formatTime, hasModRole } = require('../utils');
+const { getPatrolHistory, formatTime, hasModRole, hasReviewRole } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,7 +10,7 @@ module.exports = {
         .setDescription('Horas hacia atrás (0 = todos, default 48)')
         .setRequired(false)),
   async execute(interaction) {
-    if (!hasModRole(interaction.member)) {
+    if (!hasModRole(interaction.member) && !hasReviewRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
