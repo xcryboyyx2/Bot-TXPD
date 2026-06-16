@@ -8,7 +8,11 @@ module.exports = {
     .addStringOption(option =>
       option.setName('mensaje')
         .setDescription('Contenido del mensaje a publicar')
-        .setRequired(true)),
+        .setRequired(true))
+    .addAttachmentOption(option =>
+      option.setName('imagen')
+        .setDescription('Imagen para el embed')
+        .setRequired(false)),
   async execute(interaction) {
     if (!hasInfoRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
@@ -20,6 +24,7 @@ module.exports = {
     }
 
     const content = interaction.options.getString('mensaje');
+    const img = interaction.options.getAttachment('imagen');
 
     const thread = interaction.guild.channels.cache.get(threadId);
     if (!thread) {
@@ -31,6 +36,8 @@ module.exports = {
       .setDescription(content)
       .setAuthor({ name: interaction.member.displayName, iconURL: interaction.user.displayAvatarURL() })
       .setTimestamp();
+
+    if (img) embed.setImage(img.url);
 
     try {
       await thread.send({ embeds: [embed] });
