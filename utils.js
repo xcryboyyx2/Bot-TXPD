@@ -55,7 +55,7 @@ function cancelPatrol(userId) {
 
 function savePatrolHistory(userId, userName, displayName, startTime, elapsed, images) {
   const history = readJSON(HISTORY_FILE) || [];
-  history.push({
+  const entry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     userId,
     userName,
@@ -68,8 +68,10 @@ function savePatrolHistory(userId, userName, displayName, startTime, elapsed, im
     reviewedBy: null,
     reviewedAt: null,
     date: new Date().toISOString(),
-  });
+  };
+  history.push(entry);
   writeJSON(HISTORY_FILE, history);
+  return entry;
 }
 
 function getPatrolHistory(userId) {
@@ -160,10 +162,12 @@ function formatTimeShort(ms) {
 const ROLE_NAME = 'Refuerzos';
 const ROLE_REVIEW = 'Control de Asistencias';
 const MOD_ROLES = [
-  'Police Supervisor', 'Police Chief Supervisor', 'Special Investigation Section',
+  'Special Investigation Section',
   'Police Sergeant I', 'Police Sergeant II', 'Police Lieutenant',
   'Police Captain', 'Police Commander',
 ];
+const SUPERVISOR_ROLES = ['Police Supervisor', 'Police Chief Supervisor'];
+const CUPULA_ROLES = ['Police Sergeant I', 'Police Sergeant II', 'Police Lieutenant', 'Police Captain', 'Police Commander'];
 
 function hasOfficerRole(member) {
   return member.roles.cache.some(role => role.name === ROLE_NAME);
@@ -177,6 +181,14 @@ function hasModRole(member) {
   return member.roles.cache.some(role => MOD_ROLES.includes(role.name));
 }
 
+function hasSupervisorRole(member) {
+  return member.roles.cache.some(role => SUPERVISOR_ROLES.includes(role.name));
+}
+
+function hasCupulaRole(member) {
+  return member.roles.cache.some(role => CUPULA_ROLES.includes(role.name));
+}
+
 function isPatrolChannel(interaction) {
   const threadId = process.env.PATROL_THREAD_ID;
   if (!threadId) return true;
@@ -188,6 +200,6 @@ module.exports = {
   getActivePatrol, startPatrol, endPatrol, cancelPatrol,
   savePatrolHistory, getPatrolHistory, getRanking,
   getPendingPatrols, getPatrolById, updatePatrolStatus, revertPatrolStatus, getReviewedPatrols,
-  formatTime, formatTimeShort, hasOfficerRole, hasReviewRole, hasModRole,
+  formatTime, formatTimeShort,   hasOfficerRole, hasReviewRole, hasModRole, hasSupervisorRole, hasCupulaRole,
   isPatrolChannel,
 };

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const { hasModRole } = require('../utils');
+const { hasModRole, hasSupervisorRole } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
         .setDescription('Razón del silencio')
         .setRequired(false)),
   async execute(interaction) {
-    if (!hasModRole(interaction.member)) {
+    if (!hasModRole(interaction.member) && !hasSupervisorRole(interaction.member)) {
       return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 

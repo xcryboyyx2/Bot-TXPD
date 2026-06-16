@@ -148,15 +148,15 @@ module.exports = {
       const newStatus = action === 'approve' ? 'approved' : 'rejected';
       let logMsgId;
 
-      if (newStatus === 'approved') {
-        const logChannelId = process.env.LOG_CHANNEL_ID;
-        const logChannel = logChannelId ? interaction.guild.channels.cache.get(logChannelId) : null;
-        if (logChannel) {
-          const timeStr = formatTime(patrol.elapsed);
-          const dateStr = new Date(patrol.startTime).toLocaleString('es-ES', { timeZone: 'UTC', dateStyle: 'long', timeStyle: 'short' });
-          const member = interaction.guild.members.cache.get(patrol.userId);
-          const mention = member ? `${member}` : patrol.displayName;
+      const logChannelId = process.env.LOG_CHANNEL_ID;
+      const logChannel = logChannelId ? interaction.guild.channels.cache.get(logChannelId) : null;
+      const timeStr = formatTime(patrol.elapsed);
+      const dateStr = new Date(patrol.startTime).toLocaleString('es-ES', { timeZone: 'UTC', dateStyle: 'long', timeStyle: 'short' });
+      const member = interaction.guild.members.cache.get(patrol.userId);
+      const mention = member ? `${member}` : patrol.displayName;
 
+      if (newStatus === 'approved') {
+        if (logChannel) {
           const logEmbed = new EmbedBuilder()
             .setColor(0x00FF00)
             .setTitle('✅ Patrullaje Aprobado')
@@ -174,7 +174,30 @@ module.exports = {
           const logMsg = await logChannel.send({ embeds: [logEmbed] });
           logMsgId = logMsg.id;
         }
+      } else {
+        if (logChannel) {
+          const logEmbed = new EmbedBuilder()
+            .setColor(0xFF0000)
+            .setTitle('❌ Patrullaje Rechazado')
+            .setDescription(`${mention} — El turno \`${patrol.id}\` ha sido rechazado.`)
+            .addFields(
+              { name: '⏱ Horas', value: timeStr, inline: true },
+              { name: '📅 Fecha', value: dateStr, inline: true },
+            )
+            .setFooter({ text: 'Dudar es traición' })
+            .setTimestamp();
 
+          const bannerUrl = process.env.LOG_BANNER_URL || patrol.images.inicio;
+          if (bannerUrl) logEmbed.setImage(bannerUrl);
+
+          const logMsg = await logChannel.send({ embeds: [logEmbed] });
+          logMsgId = logMsg.id;
+        }
+      }
+
+      const officerMember = interaction.guild.members.cache.get(patrol.userId);
+
+      if (newStatus === 'approved') {
         const receiptEmbed = new EmbedBuilder()
           .setColor(0x00FF00)
           .setTitle('📄 Comprobante de Patrullaje')
@@ -192,10 +215,25 @@ module.exports = {
 
         if (patrol.images.inicio) receiptEmbed.setThumbnail(patrol.images.inicio);
 
-        const officerMember = interaction.guild.members.cache.get(patrol.userId);
         if (officerMember) {
           try {
             await officerMember.send({ embeds: [receiptEmbed] });
+          } catch {}
+        }
+      } else {
+        const rejectEmbed = new EmbedBuilder()
+          .setColor(0xFF0000)
+          .setTitle('❌ Patrullaje Rechazado')
+          .setDescription(`**Oficial:** ${patrol.displayName}\n\nTu turno \`${patrol.id}\` ha sido **rechazado**.\n\nSi crees que esto fue un error, abre un ticket y contacta al personal encargado.`)
+          .addFields(
+            { name: '⏱ Horas', value: formatTime(patrol.elapsed), inline: true },
+          )
+          .setFooter({ text: 'Dudar es traición' })
+          .setTimestamp();
+
+        if (officerMember) {
+          try {
+            await officerMember.send({ embeds: [rejectEmbed] });
           } catch {}
         }
       }

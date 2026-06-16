@@ -46,7 +46,7 @@ module.exports = {
     const imgDveh = interaction.options.getAttachment('dveh');
     const imgFuerza = interaction.options.getAttachment('fuerza');
 
-    savePatrolHistory(
+    const patrol = savePatrolHistory(
       interaction.user.id,
       interaction.member.displayName,
       interaction.member.displayName,
@@ -54,6 +54,27 @@ module.exports = {
       result.elapsed,
       { inicio: imgInicio?.url || null, fin: imgFin?.url || null, dveh: imgDveh?.url || null, fuerza: imgFuerza?.url || null }
     );
+
+    const receiptEmbed = new EmbedBuilder()
+      .setColor(0xFFA500)
+      .setTitle('📄 Comprobante de Patrullaje')
+      .setDescription(`**Oficial:** ${interaction.member.displayName}\n**Estado:** ⏳ Pendiente de revisión`)
+      .addFields(
+        { name: '🆔 ID Turno', value: `\`${patrol.id}\``, inline: true },
+        { name: '⏱ Horas', value: formatTime(result.elapsed), inline: true },
+        { name: '📸 Inicio', value: imgInicio ? `[Ver imagen](${imgInicio.url})` : 'No proporcionada', inline: true },
+        { name: '📸 Fin', value: imgFin ? `[Ver imagen](${imgFin.url})` : 'No proporcionada', inline: true },
+        { name: '📸 /dveh', value: imgDveh ? `[Ver imagen](${imgDveh.url})` : 'No proporcionada', inline: true },
+        { name: '📸 /fuerza', value: imgFuerza ? `[Ver imagen](${imgFuerza.url})` : 'No proporcionada', inline: true },
+      )
+      .setFooter({ text: 'Dudar es traición' })
+      .setTimestamp();
+
+    if (imgInicio) receiptEmbed.setThumbnail(imgInicio.url);
+
+    try {
+      await interaction.user.send({ embeds: [receiptEmbed] });
+    } catch {}
 
     const embed = new EmbedBuilder()
       .setColor(0x00FF00)

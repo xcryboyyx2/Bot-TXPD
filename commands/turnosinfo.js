@@ -1,13 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const { hasModRole, hasReviewRole } = require('../utils');
+const { hasCupulaRole } = require('../utils');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('turnosinfo')
     .setDescription('Crear post informativo sobre el sistema de turnos en el foro'),
   async execute(interaction) {
-    if (!hasModRole(interaction.member) && !hasReviewRole(interaction.member)) {
-      return interaction.reply({ content: '❌ No tienes permiso para usar este comando.', flags: MessageFlags.Ephemeral });
+    if (!hasCupulaRole(interaction.member)) {
+      return interaction.reply({ content: '❌ Solo la cúpula departamental puede usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
     const threadId = process.env.PATROL_THREAD_ID;
