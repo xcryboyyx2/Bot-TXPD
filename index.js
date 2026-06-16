@@ -22,11 +22,11 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-client.once('clientReady', async () => {
+client.once('ready', async () => {
   setInterval(() => {
     try {
       client.user?.setPresence({
-        activities: [{ name: 'TXPD | /ticket', type: 3 }],
+        activities: [{ name: 'Texas Police Department - Newgamers 3', type: 3 }],
         status: 'online',
       });
     } catch {}
