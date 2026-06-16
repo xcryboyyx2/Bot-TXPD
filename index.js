@@ -344,11 +344,31 @@ function hasTicketStaffRole(member, channel) {
 
 client.on('messageCreate', async message => {
   if (message.author.bot) return;
-  if (!message.content.startsWith('$')) return;
-  if (!message.channel.name?.startsWith('ticket-')) return;
 
+  const prefix = message.content[0];
   const args = message.content.slice(1).trim().split(/\s+/);
   const cmd = args[0]?.toLowerCase();
+
+  // --- Informative commands (-prefix) ---
+  if (prefix === '-') {
+    if (cmd === 'reportar') {
+      const embed = new EmbedBuilder()
+        .setColor(0x3498DB)
+        .setTitle('📋 Reportar un Oficial')
+        .setDescription('Si deseas reportar a un oficial por cualquier falta o algo que haya hecho mal, puedes dirigirte al discord de [**Atención Faccionaria**](https://discord.gg/j9WetMuJTe)')
+        .setImage('https://i.imgur.com/tp2rHG4.jpeg')
+        .setTimestamp();
+
+      await message.channel.send({ embeds: [embed] });
+      return;
+    }
+
+    return;
+  }
+
+  // --- Ticket commands ($-prefix, only in ticket channels) ---
+  if (prefix !== '$') return;
+  if (!message.channel.name?.startsWith('ticket-')) return;
   const channel = message.channel;
   const topic = channel.topic;
   const creatorId = topic ? topic.split(' | ')[0].trim() : null;
